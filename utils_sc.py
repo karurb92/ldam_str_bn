@@ -2,7 +2,7 @@
 from google.colab import drive
 import zipfile
 import pandas as pd
-from config_sc import *
+import config_sc
 
 def connect_gdrive():
   drive.mount('/content/drive/')
@@ -26,9 +26,9 @@ def draw_data(metadf, imb_ratio, strat_dims, y='dx'):
   return df
 
 def load_metadf():
-  metadf = pd.read_csv(f'{project_path}/{file_imgs_metadata}')
-  metadf['dx_alternative'] = metadf['dx'].map(y_mapping)
-  break_points = [-1.0] + sorted(age_mapping)
-  labels = [age_mapping[value] for value in sorted(age_mapping)]
+  metadf = pd.read_csv(f'{config_sc.project_path}/{config_sc.file_imgs_metadata}')
+  metadf['dx_alternative'] = metadf['dx'].map(config_sc.y_mapping)
+  break_points = [-1.0] + sorted(config_sc.age_mapping)
+  labels = [config_sc.age_mapping[value] for value in sorted(config_sc.age_mapping)]
   metadf['age_mapped'] = pd.cut(metadf['age'], bins=break_points, labels=labels)
   return metadf
