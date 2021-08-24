@@ -1,5 +1,5 @@
 #utils
-from google.colab import drive
+#from google.colab import drive
 import zipfile
 import pandas as pd
 import config_sc
