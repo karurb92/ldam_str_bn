@@ -21,11 +21,12 @@ class LDAMLoss():
         batch_m = tf.matmul(self.m_list[None, :], index_float.transpose(0,1))
         batch_m = tf.reshape(batch_m,(-1, 1))
         x_m = x - batch_m
-    
+
+        # if condition is true, return x_m[index], otherwise return x[index]
         output = tf.where(index, x_m, x)
         # Continue - For using tf softmax cross_entropy, we need labels and logits
-        labels = null
-        logits = null
+        labels = target
+        logits = output
         return tf.nn.softmax_cross_entropy_with_logits(labels=labels, logits=logits)
 
         '''
