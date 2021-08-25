@@ -13,6 +13,7 @@ from tensorflow import keras
 from models.resnet import res_net_model
 from strat_data_generator import StratifiedDataGenerator
 
+from losses import *
 
 def main():
     # parse args here
@@ -42,7 +43,7 @@ def main():
 
     # model = res_net_model()
     # model.compile(optimizer=keras.optimizers.Adam(),
-    #               loss='TODO',
+    #               loss='LDAMLoss()',
     #               metrics=['TODO'])
     ###KAROL: WE HAVE TO USE fit_generator()
     # model.fit(train_dataset, epochs=30, steps_per_epoch=195,
