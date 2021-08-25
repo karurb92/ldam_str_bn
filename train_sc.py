@@ -11,13 +11,27 @@ import pandas as pd
 import tensorflow as tf
 from tensorflow import keras
 from models.resnet import res_net_model
+from strat_data_generator import StratifiedDataGenerator
 
 
 def main():
     # parse args here
+    #OBLIGATORY: imb_ratio
+    #NOT OBL: strat_dims, y, 
 
     metadf = load_metadf()
     data = draw_data(metadf, imb_ratio, strat_dims, y)
+    #TODO draw IDs according to train-val-test split, save to numpy? data_train, data_val, data_test as lists of image ids. labels as dictionary of id:class_NUMBER (0 to 7)
+    #somehow we need to save their strat_dim values as well (list of triplets (not always triplets)). ADD DIMENSION EVEN IF THERE IS NO STRAT
+    
+    params_generator = {'dim': (450, 600, 3),
+          'batch_size': 64,
+          'n_classes': 7,
+          'shuffle': True}
+
+    training_generator = StratifiedDataGenerator(data_train, labels, strat_dims, **params_generator)
+    validation_generator = StratifiedDataGenerator(data_val, labels, strat_dims, **params_generator)
+
 
     # callbacks = [
     #     # Write TensorBoard logs to `./logs` directory
@@ -30,6 +44,7 @@ def main():
     # model.compile(optimizer=keras.optimizers.Adam(),
     #               loss='TODO',
     #               metrics=['TODO'])
+    ###KAROL: WE HAVE TO USE fit_generator()
     # model.fit(train_dataset, epochs=30, steps_per_epoch=195,
     #           validation_data=valid_dataset,
     #           validation_steps=3, callbacks=callbacks)
