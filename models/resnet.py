@@ -25,6 +25,7 @@ def res_net_model(num_res_net_blocks=10):
     # ======================================
     # add stratified batch norm here
     # ======================================
+    n_classes = 7
 
     x = layers.Conv2D(32, 3, activation='relu')(inputs)
     x = layers.Conv2D(64, 3, activation='relu')(x)
@@ -35,7 +36,7 @@ def res_net_model(num_res_net_blocks=10):
     x = layers.GlobalAveragePooling2D()(x)
     x = layers.Dense(256, activation='relu')(x)
     x = layers.Dropout(0.5)(x)
-    outputs = layers.Dense(10, activation='softmax')(x)
+    outputs = layers.Dense(n_classes, activation='softmax')(x)
 
     return keras.Model(inputs, outputs)
 
