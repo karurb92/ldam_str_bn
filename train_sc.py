@@ -24,6 +24,9 @@ def main():
     #TODO draw IDs according to train-val-test split, save to numpy? data_train, data_val, data_test as lists of image ids. labels as dictionary of id:class_NUMBER (0 to 7)
     #somehow we need to save their strat_dim values as well (list of triplets (not always triplets)). ADD DIMENSION EVEN IF THERE IS NO STRAT
     
+    ### assess on imbalance or balance? should split be done before or after draw_data
+    ### project_path, new batch_norm class, finalize data generator, think of some preprocessing that could serve for forward pass later (processing img outside of data generation class)
+
     params_generator = {'dim': (450, 600, 3),
           'batch_size': 64,
           'n_classes': 7,
