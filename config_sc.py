@@ -2,13 +2,15 @@
 import os
 
 project_path = os.path.abspath(os.getcwd()) + '\\local_work'
+imgs_path = project_path + '\\all_imgs'
 file_imgs = ['HAM10000_images_part_1.zip', 'HAM10000_images_part_2.zip']
 file_imgs_metadata = 'HAM10000_metadata.csv'
-imgs = 'all_imgs'
 
 # for this ratios we will train different models. it's used to assess n of rows to be drawn from the data (to ensure every model has same n)
 imb_ratios = [1, 10, 100]
 
+'''
+to be deleted?
 # in case we want to work on simplified problem. dict after short research, might need confirmation
 y_mapping = {
     'bkl': 'benign',
@@ -19,6 +21,7 @@ y_mapping = {
     'bcc': 'malignant & safe',
     'akiec': 'benign'
 }
+'''
 
 classes = {
     4: ('nv', ' melanocytic nevi'),
