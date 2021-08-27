@@ -53,14 +53,19 @@ class DataGenerator(keras.utils.Sequence):
         #Generates data containing batch_size samples
 
         X = np.empty((self.batch_size, *self.dim))
+        #change meta_X to numpy as it should be (through some predefined dict in config_sc?)
+        meta_X = []#np.empty((self.batch_size, len(list_imgs_temp[0])-1))
         y = np.empty((self.batch_size), dtype=int)
 
         # Generate data
         for i, img in enumerate(list_imgs_temp):
             X[i,] = self.__get_img_to_numpy(img[0])
+            #set meta_X as numpy
+            meta_X.append(img[1:])
             y[i] = self.labels[img[0]]
 
-        return X, keras.utils.to_categorical(y, num_classes=self.n_classes)
+        #finish adding second input
+        return [X, meta_X], keras.utils.to_categorical(y, num_classes=self.n_classes)
 
     def __get_img_to_numpy(self, img):
         pic = PIL.Image.open(f'{self.data_path}\\{img}.jpg')
