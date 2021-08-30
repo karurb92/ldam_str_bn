@@ -102,11 +102,13 @@ class StratBN(tf.keras.layers.Layer):
     # build, where you know the shapes of the input tensors and can do the rest of the initialization
 
     def build(self, input_shape):
-        input_shape = tf.TensorShape(input_shape)
-        if not input_shape.ndims:
+        input_shape_data = tf.TensorShape(input_shape[0])
+        input_shape_strat = tf.TensorShape(input_shape[1])
+
+        if not input_shape_data.ndims:
             raise ValueError(
-                f'Input has undefined rank. Received: input_shape={input_shape}.')
-        ndims = len(input_shape)
+                f'Input has undefined rank. Received: input_shape={input_shape_data}.')
+        ndims = len(input_shape_data)
 
         # Convert axis to list and
         if isinstance(self.axis, int):
@@ -126,7 +128,7 @@ class StratBN(tf.keras.layers.Layer):
         if len(self.axis) != len(set(self.axis)):
             raise ValueError('Duplicate axis: %s' % (self.axis,))
 
-        axis_to_dim = {x: input_shape.dims[x].value for x in self.axis}
+        axis_to_dim = {x: input_shape_data.dims[x].value for x in self.axis}
         for x in axis_to_dim:
             if axis_to_dim[x] is None:
                 raise ValueError('Input has undefined `axis` dimension. Received input '
@@ -135,12 +137,13 @@ class StratBN(tf.keras.layers.Layer):
 
         if len(axis_to_dim) == 1:
             # Single axis batch norm (most common/default use-case)
-            param_shape = (list(axis_to_dim.values())[0],)
+            param_shape = [list(axis_to_dim.values())[0], input_shape_strat[1]]
         else:
             # Parameter shape is the original shape but with 1 in all non-axis dims
             param_shape = [
                 axis_to_dim[i] if i in axis_to_dim else 1 for i in range(ndims)
             ]
+            param_shape.append(input_shape_strat[1])
 
         print(param_shape)
 

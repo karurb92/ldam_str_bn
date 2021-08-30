@@ -1,13 +1,9 @@
 #utils
-#from google.colab import drive
 import zipfile
 import pandas as pd
 import numpy as np
 import math
 import config_sc
-
-def connect_gdrive():
-  drive.mount('/content/drive/')
 
 def unzip_imgs(data_path):
   for file_img in config_sc.file_imgs:
@@ -36,6 +32,15 @@ def draw_data(metadf, imb_ratio, strat_dims=['sex', 'age_mapped'], train_split =
   for dim in strat_dims:
     df = df[df[dim].notnull()]
 
+  if len(strat_dims)==0:
+    df['strat_class'] = 0
+    strat_classes_num = 1
+  else:
+    df_strat = df[strat_dims].groupby(strat_dims).size().reset_index().rename(columns={0:'strat_class'})
+    df_strat['strat_class'] = df_strat.index
+    df = df.merge(df_strat, on=strat_dims)
+    strat_classes_num = len(df_strat)
+
   y='dx'
   max_n = check_max_n(df, y)
   main_class = df[['image_id', y]].groupby(y).agg('count').sort_values(by='image_id', ascending=False).index[0]
@@ -48,7 +53,7 @@ def draw_data(metadf, imb_ratio, strat_dims=['sex', 'age_mapped'], train_split =
   df_labels = df_drawn.merge(pd.DataFrame(dict_reverse.items()), left_on='dx', right_on=0)
   labels = pd.Series(df_labels[1].values, index = df_labels['image_id']).to_dict()
 
-  columns = ['image_id', *strat_dims]
+  columns = ['image_id', 'strat_class']
   df_drawn = df_drawn[columns]
 
   msk = np.random.rand(len(df_drawn)) < train_split
@@ -58,7 +63,7 @@ def draw_data(metadf, imb_ratio, strat_dims=['sex', 'age_mapped'], train_split =
   data_train = df_train.values.tolist()
   data_val = df_val.values.tolist()
 
-  return data_train, data_val, labels
+  return data_train, data_val, labels, strat_classes_num
 
 def load_metadf(data_path):
   metadf = pd.read_csv(f'{data_path}/{config_sc.file_imgs_metadata}')

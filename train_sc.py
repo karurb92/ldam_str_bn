@@ -23,15 +23,15 @@ def main():
     ### assess on imbalance or balance?
 
     metadf = load_metadf(data_path)
-    data_train, data_val, labels = draw_data(metadf, imb_ratio, strat_dims, train_split)
+    data_train, data_val, labels, strat_classes_num = draw_data(metadf, imb_ratio, strat_dims, train_split)
     
     params_generator = {'dim': (450, 600, 3),
           'batch_size': batch_size,
           'n_classes': 7,
           'shuffle': True}
 
-    training_generator = DataGenerator(data_train, labels, data_path, **params_generator)
-    validation_generator = DataGenerator(data_val, labels, data_path, **params_generator)
+    training_generator = DataGenerator(data_train, labels, strat_classes_num, data_path, **params_generator)
+    validation_generator = DataGenerator(data_val, labels, strat_classes_num, data_path, **params_generator)
 
 
     # callbacks = [
@@ -42,6 +42,7 @@ def main():
 
 
     # model = res_net_model()
+    ###ADD ARG strat_classes_num
     # model.compile(optimizer=keras.optimizers.Adam(),
     #               loss='LDAMLoss()',
     #               metrics=['TODO'])

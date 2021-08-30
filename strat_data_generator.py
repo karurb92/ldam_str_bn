@@ -16,11 +16,12 @@ import PIL.Image
 
 class DataGenerator(keras.utils.Sequence):
     #Generates data for Keras
-    def __init__(self, list_imgs, labels, data_path, batch_size=32, dim=(450, 600, 3), n_classes=7, shuffle=True):
+    def __init__(self, list_imgs, labels, strat_classes_num, data_path, batch_size=32, dim=(450, 600, 3), n_classes=7, shuffle=True):
         self.dim = dim
         self.batch_size = batch_size
         self.labels = labels
         self.list_imgs = list_imgs
+        self.strat_classes_num = strat_classes_num
         self.data_path = data_path
         self.n_classes = n_classes
         self.shuffle = shuffle
@@ -53,15 +54,13 @@ class DataGenerator(keras.utils.Sequence):
         #Generates data containing batch_size samples
 
         X = np.empty((self.batch_size, *self.dim))
-        #change meta_X to numpy as it should be (through some predefined dict in config_sc?)
-        meta_X = []#np.empty((self.batch_size, len(list_imgs_temp[0])-1))
+        meta_X = np.empty((self.batch_size, self.strat_classes_num))
         y = np.empty((self.batch_size), dtype=int)
 
         # Generate data
         for i, img in enumerate(list_imgs_temp):
             X[i,] = self.__get_img_to_numpy(img[0])
-            #set meta_X as numpy
-            meta_X.append(img[1:])
+            meta_X[i,] = [img[1]==el for el in range(self.strat_classes_num)]
             y[i] = self.labels[img[0]]
 
         #finish adding second input

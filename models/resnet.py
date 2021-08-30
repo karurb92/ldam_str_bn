@@ -19,14 +19,14 @@ def res_net_block(input_data, filters, conv_size):
     return x
 
 
-def res_net_model(num_res_net_blocks=10):
+def res_net_model(strat_classes_num, num_res_net_blocks=10):
     # CIFAR-10 image size
 
     inputs = keras.Input(shape=(450, 600, 3))
     '''
     probably we need to have 2 inputs like this:
     inputs1 = keras.Input(shape=(450, 600, 3))
-    inputs2 = keras.Input(shape=(2,)) #or whatever shape stratification requires, probably needs to be universal
+    inputs2 = keras.Input(shape=(strat_classes_num,)) #or whatever shape stratification requires, probably needs to be universal
     which we then pass to strat bn layer as [inputs1, inputs2]
     to be tested.
     '''
