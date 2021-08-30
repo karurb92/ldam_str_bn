@@ -16,7 +16,7 @@ class LDAMLoss():
     def __call__(self, x, target):
         index = tf.zeros(x, dtype=tf.dtypes.uint8)
         # a little bit confused to convert parameters in torch.scatter_ to tf.scatter_nd
-        tf.scatter_nd(tf.reshape(target.data,(-1, 1)), index, 1)
+        index = tf.scatter_nd(tf.reshape(target.data,(-1, 1)), index, 1)
         index_float = tf.convert_to_tensor(index, dtype=tf.float32)
         batch_m = tf.matmul(self.m_list[None, :], index_float.transpose(0,1))
         batch_m = tf.reshape(batch_m,(-1, 1))
