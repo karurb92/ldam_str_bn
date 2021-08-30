@@ -1,8 +1,9 @@
 import numpy as np
 import tensorflow as tf
 
+
 class LDAMLoss():
-    
+
     def __init__(self, cls_num_list, max_m=0.5, weight=None, s=30):
         super(LDAMLoss, self).__init__()
         m_list = 1.0 / np.sqrt(np.sqrt(cls_num_list))
@@ -14,12 +15,12 @@ class LDAMLoss():
         self.weight = weight
 
     def __call__(self, x, target):
-        index = tf.zeros(x, dtype=tf.dtypes.uint8)
+        index = tf.zeros_like(x, dtype=tf.dtypes.uint8)
         # a little bit confused to convert parameters in torch.scatter_ to tf.scatter_nd
-        tf.scatter_nd(tf.reshape(target.data,(-1, 1)), index, 1)
+        index = tf.scatter_nd(tf.reshape(target.data, (-1, 1)), index, 1)
         index_float = tf.convert_to_tensor(index, dtype=tf.float32)
-        batch_m = tf.matmul(self.m_list[None, :], index_float.transpose(0,1))
-        batch_m = tf.reshape(batch_m,(-1, 1))
+        batch_m = tf.matmul(self.m_list[None, :], index_float.transpose(0, 1))
+        batch_m = tf.reshape(batch_m, (-1, 1))
         x_m = x - batch_m
 
         # if condition is true, return x_m[index], otherwise return x[index]

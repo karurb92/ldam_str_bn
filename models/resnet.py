@@ -19,7 +19,12 @@ def res_net_block(input_data, filters, conv_size):
     return x
 
 
+<<<<<<< HEAD
 def res_net_model(strat_classes_num, num_res_net_blocks=10):
+=======
+
+def res_net_model(num_res_net_blocks=10):
+>>>>>>> 407f706a814ce11716a9c7d4eb0074c74aa43eec
     # CIFAR-10 image size
 
     inputs = keras.Input(shape=(450, 600, 3))

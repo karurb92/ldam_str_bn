@@ -2,3 +2,4 @@ env/
 data/
 local_work/
 playground.ipynb
+__pycache__/
