@@ -10,6 +10,13 @@ from keras import backend
 # https://www.tensorflow.org/tutorials/customization/custom_layers#implementing_custom_layers
 
 
+'''
+test it with:
+input1 = tf.constant([[1., 10., 100.], [2., 20., 200.], [3., 30., 300.], [4., 40., 400.], [5., 50., 500.]])
+input2 = tf.constant([[1., 0., 0.], [1., 0., 0.], [1., 0., 0.], [0., 1., 0.], [0., 1., 0.]])
+strat_classes_num = 2
+'''
+
 class StratBN(tf.keras.layers.Layer):
 
     # __init__ , where you can do all input-independent initialization
@@ -137,13 +144,13 @@ class StratBN(tf.keras.layers.Layer):
 
         if len(axis_to_dim) == 1:
             # Single axis batch norm (most common/default use-case)
-            param_shape = [list(axis_to_dim.values())[0], input_shape_strat[1]]
+            param_shape = [input_shape_strat[1], list(axis_to_dim.values())[0]]
         else:
             # Parameter shape is the original shape but with 1 in all non-axis dims
             param_shape = [
                 axis_to_dim[i] if i in axis_to_dim else 1 for i in range(ndims)
             ]
-            param_shape.append(input_shape_strat[1])
+            param_shape = [input_shape_strat[1]] + param_shape
 
         print(param_shape)
 
@@ -214,17 +221,28 @@ class StratBN(tf.keras.layers.Layer):
     def call(self, inputs, training=None):
         training = self._get_training_value(training)
 
-        inputs_dtype = inputs.dtype.base_dtype
+        inputs_data = inputs[0]
+        inputs_strat = inputs[1]
+
+        inputs_dtype = inputs_strat.dtype.base_dtype
         if inputs_dtype in (tf.float16, tf.bfloat16):
             # Do all math in float32 if given 16-bit inputs for numeric stability.
             # In particular, it's very easy for variance to overflow in float16 and
             # for safety we also choose to cast bfloat16 to float32.
-            inputs = tf.cast(inputs, tf.float32)
+            inputs_strat = tf.cast(inputs_strat, tf.float32)
+        inputs_dtype = inputs_data.dtype.base_dtype
+        if inputs_dtype in (tf.float16, tf.bfloat16):
+            # Do all math in float32 if given 16-bit inputs for numeric stability.
+            # In particular, it's very easy for variance to overflow in float16 and
+            # for safety we also choose to cast bfloat16 to float32.
+            inputs_data = tf.cast(inputs_data, tf.float32)
+
 
         # Compute the axes along which to reduce the mean / variance
-        input_shape = inputs.shape
+        input_shape = inputs_data.shape
         ndims = len(input_shape)
         reduction_axes = [i for i in range(ndims) if i not in self.axis]
+        print(reduction_axes)
 
         # Broadcasting only necessary for single-axis batch norm where the axis is
         # not the last dimension
@@ -236,57 +254,66 @@ class StratBN(tf.keras.layers.Layer):
                 return tf.reshape(v, broadcast_shape)
             return v
 
-        scale, offset = _broadcast(self.gamma), _broadcast(self.beta)
+        output = tf.zeros([0, *inputs_data.shape[1:]])
 
-        training_value = control_flow_util.constant_value(training)
-        if training_value == False:  # pylint: disable=singleton-comparison,g-explicit-bool-comparison
-            print('Not training so use moving mean and var')
-            mean, variance = self.moving_mean, self.moving_variance
-        else:
-            # Some of the computations here are not necessary when training==False
-            # but not a constant. However, this makes the code simpler.
-            keep_dims = len(self.axis) > 1
-            mean, variance = self._moments(
-                tf.cast(inputs, self._param_dtype),
-                reduction_axes,
-                keep_dims=keep_dims)
+        for strat_class in range(inputs_strat.shape[1]):
 
-            new_mean, new_variance = mean, variance
-            input_batch_size = None
+            inputs_subdata = tf.boolean_mask(inputs_data, inputs_strat[:, strat_class])
+            scale, offset = _broadcast(self.gamma[strat_class]), _broadcast(self.beta[strat_class])
 
-            def _do_update(var, value):
-                """Compute the updates for mean and variance."""
-                return self._assign_moving_average(var, value, self.momentum, input_batch_size)
+            training_value = control_flow_util.constant_value(training)
+            if training_value == False:  # pylint: disable=singleton-comparison,g-explicit-bool-comparison
+                print('Not training so use moving mean and var')
+                mean, variance = self.moving_mean[strat_class], self.moving_variance[strat_class]
+            else:
+                # Some of the computations here are not necessary when training==False
+                # but not a constant. However, this makes the code simpler.
+                keep_dims = len(self.axis) > 1
+                mean, variance = self._moments(
+                    tf.cast(inputs_subdata, self._param_dtype),
+                    reduction_axes,
+                    keep_dims=keep_dims)
 
-            def mean_update():
-                return _do_update(self.moving_mean, new_mean)
+                new_mean, new_variance = mean, variance
+                input_batch_size = None
 
-            def variance_update():
-                """Update the moving variance."""
+                '''
+                this commented part below is not working properly. my guess is that we're passing tf.Tensor instead of tf.Variable as variable (because we're taking a slice only).
+                one idea could be to define moving avg and variance as array of tf.Variables to be updated separately in each loop?
+                maybe if it's too difficult to overcome this, we can use shape (3) instead of (strat_classes_num, 3) for moving mean and var
+                '''
+                ###############################################
+                '''
+                def _do_update(var, value):
+                    """Compute the updates for mean and variance."""
+                    return self._assign_moving_average(var, value, self.momentum, input_batch_size)
 
-                return _do_update(self.moving_variance, new_variance)
+                def mean_update():
+                    return _do_update(self.moving_mean[strat_class], new_mean)
 
-            self.add_update(mean_update)
-            self.add_update(variance_update)
+                def variance_update():
+                    return _do_update(self.moving_variance[strat_class], new_variance)
 
-        mean = tf.cast(mean, inputs.dtype)
-        variance = tf.cast(variance, inputs.dtype)
-        offset = tf.cast(offset, inputs.dtype)
-        scale = tf.cast(scale, inputs.dtype)
+                self.add_update(mean_update)
+                self.add_update(variance_update)
+                '''
+                ###############################################
 
-        print(mean, variance, offset, scale)
+            mean = tf.cast(mean, inputs_subdata.dtype)
+            variance = tf.cast(variance, inputs_subdata.dtype)
+            offset = tf.cast(offset, inputs_subdata.dtype)
+            scale = tf.cast(scale, inputs_subdata.dtype)
 
-        outputs = tf.nn.batch_normalization(inputs, _broadcast(mean),
-                                            _broadcast(
-                                                variance), offset, scale,
-                                            self.epsilon)
-        if inputs_dtype in (tf.float16, tf.bfloat16):
-            outputs = tf.cast(outputs, inputs_dtype)
+            print(mean, variance, offset, scale)
 
-        # If some components of the shape got lost due to adjustments, fix that.
-        outputs.set_shape(input_shape)
+            outputs_subdata = tf.nn.batch_normalization(inputs_subdata, _broadcast(mean),
+                                                _broadcast(
+                                                    variance), offset, scale,
+                                                self.epsilon)
+            if inputs_dtype in (tf.float16, tf.bfloat16):
+                outputs_subdata = tf.cast(outputs_subdata, inputs_dtype)
 
-        return outputs
+            output = tf.concat([output, outputs_subdata], axis=0)
+            print(outputs_subdata)
 
-    def compute_output_shape(self, input_shape):
-        return input_shape
+        return output
