@@ -2,7 +2,7 @@ import tensorflow as tf
 from models import strat_bn
 # import numpy as np
 
-m = strat_bn_copy.StratBN(axis=[-1])
+m = strat_bn.StratBN(axis=[-1])
 
 input_shape = [8, 32, 32, 3]
 # m.build(input_shape)
