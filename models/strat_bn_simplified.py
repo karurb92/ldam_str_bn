@@ -248,35 +248,20 @@ class StratBN(tf.keras.layers.Layer):
                 reduction_axes,
                 keep_dims=keep_dims)
 
-            moving_mean = self.moving_mean
-            moving_variance = self.moving_variance
-
-            mean = control_flow_util.smart_cond(
-                training, lambda: mean,
-                lambda: tf.convert_to_tensor(moving_mean))
-            variance = control_flow_util.smart_cond(
-                training, lambda: variance,
-                lambda: tf.convert_to_tensor(moving_variance))
-
             new_mean, new_variance = mean, variance
             input_batch_size = None
 
             def _do_update(var, value):
                 """Compute the updates for mean and variance."""
-                return self._assign_moving_average(var, value, self.momentum,
-                                                   input_batch_size)
+                return self._assign_moving_average(var, value, self.momentum, input_batch_size)
 
             def mean_update():
-                def true_branch(): return _do_update(self.moving_mean, new_mean)
-                def false_branch(): return self.moving_mean
-                return control_flow_util.smart_cond(training, true_branch, false_branch)
+                return _do_update(self.moving_mean, new_mean)
 
             def variance_update():
                 """Update the moving variance."""
 
-                def true_branch(): return _do_update(self.moving_variance, new_variance)
-                def false_branch(): return self.moving_variance
-                return control_flow_util.smart_cond(training, true_branch, false_branch)
+                return _do_update(self.moving_variance, new_variance)
 
             self.add_update(mean_update)
             self.add_update(variance_update)

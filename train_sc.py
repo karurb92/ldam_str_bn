@@ -11,27 +11,27 @@ import pandas as pd
 import tensorflow as tf
 from tensorflow import keras
 from models.resnet import res_net_model
-from strat_data_generator import StratifiedDataGenerator
-
+from strat_data_generator import DataGenerator
 from losses import *
 
-def main():
-    # parse args here
-    #OBLIGATORY: imb_ratio
-    #NOT OBL: strat_dims, y, 
+# parse args here
+#imb_ratio, strat_dims, data_path, train_split, batch_size
 
-    metadf = load_metadf()
-    data = draw_data(metadf, imb_ratio, strat_dims, y)
-    #TODO draw IDs according to train-val-test split, save to numpy? data_train, data_val, data_test as lists of image ids. labels as dictionary of id:class_NUMBER (0 to 7)
-    #somehow we need to save their strat_dim values as well (list of triplets (not always triplets)). ADD DIMENSION EVEN IF THERE IS NO STRAT
+def main():
+
+    ### before we feed all imgs here, we should earlier decide on some constant test set
+    ### assess on imbalance or balance?
+
+    metadf = load_metadf(data_path)
+    data_train, data_val, labels = draw_data(metadf, imb_ratio, strat_dims, train_split)
     
     params_generator = {'dim': (450, 600, 3),
-          'batch_size': 64,
+          'batch_size': batch_size,
           'n_classes': 7,
           'shuffle': True}
 
-    training_generator = StratifiedDataGenerator(data_train, labels, strat_dims, **params_generator)
-    validation_generator = StratifiedDataGenerator(data_val, labels, strat_dims, **params_generator)
+    training_generator = DataGenerator(data_train, labels, data_path, **params_generator)
+    validation_generator = DataGenerator(data_val, labels, data_path, **params_generator)
 
 
     # callbacks = [
@@ -51,6 +51,8 @@ def main():
     #           validation_steps=3, callbacks=callbacks)
 
 # further training from here
+
+#save data_test? use it for final assessment
 
 if __name__ == '__main__':
     main()
