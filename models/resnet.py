@@ -19,6 +19,7 @@ def res_net_block(input_data, filters, conv_size):
     return x
 
 
+
 def res_net_model(num_res_net_blocks=10):
     # CIFAR-10 image size
 
