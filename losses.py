@@ -15,10 +15,12 @@ class LDAMLoss():
         self.weight = weight
 
     def __call__(self, x, target):
-        index = tf.zeros_like(x, dtype=tf.dtypes.uint8)
-        print("index :",index)
-        # a little bit confused to convert parameters in torch.scatter_ to tf.scatter_nd
-        index = tf.scatter_nd(tf.reshape(target, (-1, 1)), index, 1)
+        index = tf.zeros_like(x, dtype=tf.float32)
+        update = tf.constant([[1]],dtype=tf.float32)
+        # fix the problem
+        index = tf.reshape(index,(-1,1))
+        index = tf.tensor_scatter_nd_update(index, target, update)
+        index = tf.reshape(index,(1,-1))
         print("index :",index)
         index_float = tf.convert_to_tensor(index, dtype=tf.float32)
         batch_m = tf.matmul(self.m_list[None, :], index_float.transpose(0, 1))
