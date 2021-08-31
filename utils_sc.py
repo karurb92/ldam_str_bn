@@ -47,8 +47,8 @@ def draw_data(metadf, imb_ratio, strat_dims=['sex', 'age_mapped'], train_split =
 
   dict_reverse = dict([value[0], key] for key, value in config_sc.classes.items())
   df = df.merge(pd.DataFrame(dict_reverse.items()), left_on='dx', right_on=0)
-  observations = len(df)
-  cls_num_list = list(df.groupby(1).size()/observations)
+  #observations = len(df)
+  cls_num_list = list(df.groupby(1).size())#/observations)
 
   df_main = df[df[y]==main_class].sample(math.floor(1.0*imb_ratio/(imb_ratio+1)*max_n))
   df_rest = df[df[y]!=main_class].sample(math.floor(1.0/(imb_ratio+1)*max_n))
