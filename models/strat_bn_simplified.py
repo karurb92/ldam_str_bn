@@ -264,11 +264,14 @@ class StratBN(tf.keras.layers.Layer):
 
             inputs_subdata = tf.boolean_mask(
                 inputs_data, inputs_strat[:, strat_class])
-            scale, offset = _broadcast(
-                self.gamma[strat_class]), _broadcast(self.beta[strat_class])
 
-            print(scale)
-            print(offset)
+            sub_gamma = self.gamma[strat_class]
+            sub_beta = self.beta[strat_class]
+
+            tf.print(sub_gamma)
+            tf.print(sub_beta)
+
+            scale, offset = _broadcast(sub_gamma), _broadcast(sub_beta)
 
             # training_value = control_flow_util.constant_value(training)
             training_value = training
