@@ -1,6 +1,6 @@
-#We set up data generator for later use by .fit_generator()
-#It also performs reformatting pics
-#loosely inspired by: https://stanford.edu/~shervine/blog/keras-how-to-generate-data-on-the-fly
+# We set up data generator for later use by .fit_generator()
+# It also performs reformatting pics
+# loosely inspired by: https://stanford.edu/~shervine/blog/keras-how-to-generate-data-on-the-fly
 
 '''
 #test it with:
@@ -13,9 +13,11 @@ import numpy as np
 from tensorflow import keras
 import PIL
 import PIL.Image
+import os
+
 
 class DataGenerator(keras.utils.Sequence):
-    #Generates data for Keras
+    # Generates data for Keras
     def __init__(self, list_imgs, labels, strat_classes_num, data_path, batch_size=32, dim=(450, 600, 3), n_classes=7, shuffle=True):
         self.dim = dim
         self.batch_size = batch_size
@@ -28,11 +30,11 @@ class DataGenerator(keras.utils.Sequence):
         self.on_epoch_end()
 
     def __len__(self):
-        #Denotes the number of batches per epoch
+        # Denotes the number of batches per epoch
         return int(np.floor(len(self.list_imgs) / self.batch_size))
 
     def __getitem__(self, index):
-        #Generate one batch of data
+        # Generate one batch of data
         # Generate indexes of the batch
         indexes = self.indexes[index*self.batch_size:(index+1)*self.batch_size]
 
@@ -45,13 +47,13 @@ class DataGenerator(keras.utils.Sequence):
         return X, y
 
     def on_epoch_end(self):
-        #Updates indexes after each epoch
+        # Updates indexes after each epoch
         self.indexes = np.arange(len(self.list_imgs))
         if self.shuffle == True:
             np.random.shuffle(self.indexes)
 
     def __data_generation(self, list_imgs_temp):
-        #Generates data containing batch_size samples
+        # Generates data containing batch_size samples
 
         X = np.empty((self.batch_size, *self.dim))
         meta_X = np.empty((self.batch_size, self.strat_classes_num))
@@ -59,16 +61,19 @@ class DataGenerator(keras.utils.Sequence):
 
         # Generate data
         for i, img in enumerate(list_imgs_temp):
-            X[i,] = self.__get_img_to_numpy(img[0])
-            meta_X[i,] = [img[1]==el for el in range(self.strat_classes_num)]
+            X[i, ] = self.__get_img_to_numpy(img[0])
+            meta_X[i, ] = [img[1] == el for el in range(
+                self.strat_classes_num)]
             y[i] = self.labels[img[0]]
 
-        #finish adding second input
-        return [X, meta_X], keras.utils.to_categorical(y, num_classes=self.n_classes)
+        # finish adding second input
+        # return [X, meta_X], keras.utils.to_categorical(y, num_classes=self.n_classes)
+        return [X, meta_X], y  # just return vector
 
     def __get_img_to_numpy(self, img):
-        pic = PIL.Image.open(f'{self.data_path}\\{img}.jpg')
+        pic = PIL.Image.open(os.path.join(self.data_path, f'{img}.jpg'))
         return np.array(pic)
+
 
 '''
 not used anymore?
@@ -79,5 +84,3 @@ not used anymore?
         #we need to normalize X stratifying by values from list_imgs_temp
         return X
 '''
-
-

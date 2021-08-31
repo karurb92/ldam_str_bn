@@ -1,8 +1,8 @@
 # config
 import os
 
-project_path = os.path.abspath(os.getcwd()) + '\\local_work'
-imgs_path = project_path + '\\all_imgs'
+project_path = os.path.join(os.path.abspath(os.getcwd()), 'local_work')
+imgs_path = os.path.join(project_path, 'all_imgs')
 file_imgs = ['HAM10000_images_part_1.zip', 'HAM10000_images_part_2.zip']
 file_imgs_metadata = 'HAM10000_metadata.csv'
 
