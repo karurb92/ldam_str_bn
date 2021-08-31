@@ -26,7 +26,7 @@ def main():
     imb_ratio = 10
     strat_dims = ['age_mapped']
     train_split = 0.8
-    batch_size = 4
+    batch_size = 32
 
     metadf = load_metadf(project_path)
     data_train, data_val, labels, strat_classes_num = draw_data(
