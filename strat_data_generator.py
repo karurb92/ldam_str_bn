@@ -66,6 +66,8 @@ class DataGenerator(keras.utils.Sequence):
                 self.strat_classes_num)]
             y[i] = self.labels[img[0]]
 
+        X = X / 255.0
+
         # finish adding second input
         return [X, meta_X], keras.utils.to_categorical(y, num_classes=self.n_classes)
         # return [X, meta_X], y  # just return vector
