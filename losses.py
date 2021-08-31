@@ -16,8 +16,10 @@ class LDAMLoss():
 
     def __call__(self, x, target):
         index = tf.zeros_like(x, dtype=tf.dtypes.uint8)
+        print("index :",index)
         # a little bit confused to convert parameters in torch.scatter_ to tf.scatter_nd
-        index = tf.scatter_nd(tf.reshape(target.data, (-1, 1)), index, 1)
+        index = tf.scatter_nd(tf.reshape(target, (-1, 1)), index, 1)
+        print("index :",index)
         index_float = tf.convert_to_tensor(index, dtype=tf.float32)
         batch_m = tf.matmul(self.m_list[None, :], index_float.transpose(0, 1))
         batch_m = tf.reshape(batch_m, (-1, 1))
@@ -25,6 +27,7 @@ class LDAMLoss():
 
         # if condition is true, return x_m[index], otherwise return x[index]
         output = tf.where(index, x_m, x)
+        print("output : ",output)
         # Continue - For using tf softmax cross_entropy, we need labels and logits
         labels = target
         logits = output
