@@ -7,7 +7,8 @@ model f : R^d -> R^k and outputs k logits
 the inputs for Ldam loss is x,y 
 cls_num_list is [n1,n2,...,nk] -> the number of outputs for each classes
 '''
-cls_num_list = [0,1,0,0,0,0,0,0,0,0]
+#cls_num_list = [0,1,0,0,0,0,0,0,0,0]
+cls_num_list = [11,100,5,17,9,10,6,3,4,2]
 ldam = losses.LDAMLoss(cls_num_list=cls_num_list)
 
 network_outputs = tf.constant([[.3, .7,0,0,0,0,0,0,0,0]])

@@ -19,15 +19,18 @@ class LDAMLoss():
         update = tf.constant([[1]],dtype=tf.float32)
         # fix the problem
         index = tf.reshape(index,(-1,1))
-        index = tf.tensor_scatter_nd_update(index, target, update)
-        index = tf.reshape(index,(1,-1))
-        print("index :",index)
-        index_float = tf.convert_to_tensor(index, dtype=tf.float32)
-        batch_m = tf.matmul(self.m_list[None, :], index_float.transpose(0, 1))
+        index_float = tf.tensor_scatter_nd_update(index, target, update)
+        batch_m = tf.matmul(self.m_list[None, :], index_float)
+        print("batch_m :",batch_m)
         batch_m = tf.reshape(batch_m, (-1, 1))
+        print("batch_m :",batch_m)
         x_m = x - batch_m
+        print("x_m :",x_m)
 
         # if condition is true, return x_m[index], otherwise return x[index]
+        index = tf.cast(index_float, bool)
+        index = tf.reshape(index,(1,-1))
+        print("index :\n",index)
         output = tf.where(index, x_m, x)
         print("output : ",output)
         # Continue - For using tf softmax cross_entropy, we need labels and logits
