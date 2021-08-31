@@ -26,7 +26,7 @@ def main():
     imb_ratio = 10
     strat_dims = ['age_mapped']
     train_split = 0.8
-    batch_size = 16
+    batch_size = 4
 
     metadf = load_metadf(project_path)
     data_train, data_val, labels, strat_classes_num = draw_data(
@@ -47,7 +47,7 @@ def main():
     callbacks = [
         # Write TensorBoard logs to `./logs` directory
         keras.callbacks.TensorBoard(
-            log_dir='./log/{}'.format(dt.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")), write_images=True),
+            log_dir='./log/{}'.format(dt.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")), write_images=True, histogram_freq=1),
     ]
 
     model = test_stratbn_model(strat_classes_num)

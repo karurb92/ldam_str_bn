@@ -12,10 +12,13 @@ from keras import backend
 
 '''
 test it with:
-input1 = tf.constant([[1., 10., 100.], [2., 20., 200.], [3., 30., 300.], [4., 40., 400.], [5., 50., 500.]])
-input2 = tf.constant([[1., 0., 0.], [1., 0., 0.], [1., 0., 0.], [0., 1., 0.], [0., 1., 0.]])
+input1 = tf.constant([[1., 10., 100.], [2., 20., 200.], [
+                     3., 30., 300.], [4., 40., 400.], [5., 50., 500.]])
+input2 = tf.constant([[1., 0., 0.], [1., 0., 0.], [
+                     1., 0., 0.], [0., 1., 0.], [0., 1., 0.]])
 strat_classes_num = 2
 '''
+
 
 class StratBN(tf.keras.layers.Layer):
 
@@ -237,7 +240,6 @@ class StratBN(tf.keras.layers.Layer):
             # for safety we also choose to cast bfloat16 to float32.
             inputs_data = tf.cast(inputs_data, tf.float32)
 
-
         # Compute the axes along which to reduce the mean / variance
         input_shape = inputs_data.shape
         ndims = len(input_shape)
@@ -255,13 +257,21 @@ class StratBN(tf.keras.layers.Layer):
             return v
 
         output = tf.zeros([0, *inputs_data.shape[1:]])
+        new_means = tf.zeros([0, input_shape[self.axis[0]]])
+        new_variances = tf.zeros([0, input_shape[self.axis[0]]])
 
         for strat_class in range(inputs_strat.shape[1]):
 
-            inputs_subdata = tf.boolean_mask(inputs_data, inputs_strat[:, strat_class])
-            scale, offset = _broadcast(self.gamma[strat_class]), _broadcast(self.beta[strat_class])
+            inputs_subdata = tf.boolean_mask(
+                inputs_data, inputs_strat[:, strat_class])
+            scale, offset = _broadcast(
+                self.gamma[strat_class]), _broadcast(self.beta[strat_class])
 
-            training_value = control_flow_util.constant_value(training)
+            print(scale)
+            print(offset)
+
+            # training_value = control_flow_util.constant_value(training)
+            training_value = training
             if training_value == False:  # pylint: disable=singleton-comparison,g-explicit-bool-comparison
                 print('Not training so use moving mean and var')
                 mean, variance = self.moving_mean[strat_class], self.moving_variance[strat_class]
@@ -274,46 +284,50 @@ class StratBN(tf.keras.layers.Layer):
                     reduction_axes,
                     keep_dims=keep_dims)
 
-                new_mean, new_variance = mean, variance
-                input_batch_size = None
-
                 '''
                 this commented part below is not working properly. my guess is that we're passing tf.Tensor instead of tf.Variable as variable (because we're taking a slice only).
                 one idea could be to define moving avg and variance as array of tf.Variables to be updated separately in each loop?
                 maybe if it's too difficult to overcome this, we can use shape (3) instead of (strat_classes_num, 3) for moving mean and var
                 '''
-                ###############################################
-                '''
-                def _do_update(var, value):
-                    """Compute the updates for mean and variance."""
-                    return self._assign_moving_average(var, value, self.momentum, input_batch_size)
-
-                def mean_update():
-                    return _do_update(self.moving_mean[strat_class], new_mean)
-
-                def variance_update():
-                    return _do_update(self.moving_variance[strat_class], new_variance)
-
-                self.add_update(mean_update)
-                self.add_update(variance_update)
-                '''
-                ###############################################
 
             mean = tf.cast(mean, inputs_subdata.dtype)
             variance = tf.cast(variance, inputs_subdata.dtype)
             offset = tf.cast(offset, inputs_subdata.dtype)
             scale = tf.cast(scale, inputs_subdata.dtype)
 
+            new_means = tf.concat(
+                [new_means, tf.reshape(mean, (1, -1))], axis=0)
+            new_variances = tf.concat(
+                [new_variances, tf.reshape(variance, (1, -1))], axis=0)
+
             print(mean, variance, offset, scale)
 
             outputs_subdata = tf.nn.batch_normalization(inputs_subdata, _broadcast(mean),
-                                                _broadcast(
-                                                    variance), offset, scale,
-                                                self.epsilon)
+                                                        _broadcast(
+                variance), offset, scale,
+                self.epsilon)
             if inputs_dtype in (tf.float16, tf.bfloat16):
                 outputs_subdata = tf.cast(outputs_subdata, inputs_dtype)
 
             output = tf.concat([output, outputs_subdata], axis=0)
             print(outputs_subdata)
+
+        # this could be used for partial updates of the moving mean and variances
+        # however we decided to store all moving means variances in a temporary array
+        # and do one final update in the end
+        input_batch_size = None
+
+        def _do_update(var, value):
+            """Compute the updates for mean and variance."""
+            return self._assign_moving_average(var, value, self.momentum, input_batch_size)
+
+        def mean_update():
+            return _do_update(self.moving_mean, new_means)
+
+        def variance_update():
+            return _do_update(self.moving_variance, new_variances)
+
+        self.add_update(mean_update)
+        self.add_update(variance_update)
 
         return output
