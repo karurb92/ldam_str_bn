@@ -28,27 +28,27 @@ class LDAMLoss():
         index_float = target
 
         batch_m = tf.matmul(self.m_list[None, :], tf.transpose(index_float))
-        print("batch_m :", batch_m)
+        #print("batch_m :", batch_m)
         batch_m = tf.reshape(batch_m, (-1, 1))
-        print("batch_m :", batch_m)
+        #print("batch_m :", batch_m)
 
         # x = tf.cast(x, tf.float32)
 
         x_m = x - batch_m
-        print("x_m :", x_m)
+        #print("x_m :", x_m)
 
         # if condition is true, return x_m[index], otherwise return x[index]
         index_bool = tf.cast(index_float, bool)
         # index_bool = tf.reshape(index_bool, (1, -1))
         output = tf.where(index_bool, x_m, x)
-        print("output : ", output)
+        #print("output : ", output)
 
-        print(index_bool)
-        print(index_float)
+        #print(index_bool)
+        #print(index_float)
 
         labels = index_float
         logits = output
-        print("labels : \n", labels, "\n logits : \n", logits)
+        #print("labels : \n", labels, "\n logits : \n", logits)
         loss = tf.nn.softmax_cross_entropy_with_logits(
             labels=labels, logits=logits*self.s)
         return tf.reduce_mean(loss)

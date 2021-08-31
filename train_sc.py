@@ -18,7 +18,6 @@ import datetime as dt
 # parse args here
 #imb_ratio, strat_dims, data_path, train_split, batch_size
 
-
 def main():
 
     # before we feed all imgs here, we should earlier decide on some constant test set
@@ -26,10 +25,11 @@ def main():
     imb_ratio = 10
     strat_dims = ['age_mapped']
     train_split = 0.8
-    batch_size = 4
+    batch_size = 32
+    data_path = project_path
 
-    metadf = load_metadf(project_path)
-    data_train, data_val, labels, strat_classes_num = draw_data(
+    metadf = load_metadf(data_path)
+    data_train, data_val, labels, strat_classes_num, cls_num_list = draw_data(
         metadf, imb_ratio, strat_dims, train_split)
 
     print(strat_classes_num)
@@ -50,17 +50,14 @@ def main():
             log_dir='./log/{}'.format(dt.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")), write_images=True, histogram_freq=1),
     ]
 
-    model = test_stratbn_model(strat_classes_num)
+    model = res_net_model(strat_classes_num, num_res_net_blocks=2)
     print(model.summary())
 
     # out = model((tf.ones((2, 450, 600, 3)), tf.ones(2, 1)))
     # print(out)
-    # return
-
-    # ADD ARG strat_classes_num
 
     # we need to know how frequent every class is
-    cls_num_list = [1, 1, 1, 1, 1, 1, 1]
+    # cls_num_list = [1, 1, 1, 1, 1, 1, 1]
 
     model.compile(optimizer=keras.optimizers.Adam(),
                   loss=LDAMLoss(cls_num_list),
@@ -70,11 +67,10 @@ def main():
     #           validation_steps=3, epochs=10, callbacks=callbacks)
 
     # no validation for now
-    model.fit(training_generator, epochs=10, callbacks=callbacks)
+    model.fit(training_generator, epochs=10, validation_data=validation_generator, callbacks=callbacks)
+    # model.fit_generator(training_generator, epochs=10, validation_data=validation_generator, callbacks=callbacks)
 
-# further training from here
-
-# save data_test? use it for final assessment
+    model.save(data_path)
 
 
 if __name__ == '__main__':

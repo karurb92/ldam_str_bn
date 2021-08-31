@@ -62,27 +62,14 @@ class DataGenerator(keras.utils.Sequence):
         # Generate data
         for i, img in enumerate(list_imgs_temp):
             X[i, ] = self.__get_img_to_numpy(img[0])
-            meta_X[i, ] = [img[1] == el for el in range(
-                self.strat_classes_num)]
+            meta_X[i, ] = [img[1] == el for el in range(self.strat_classes_num)]
             y[i] = self.labels[img[0]]
 
         X = X / 255.0
 
-        # finish adding second input
         return [X, meta_X], keras.utils.to_categorical(y, num_classes=self.n_classes)
-        # return [X, meta_X], y  # just return vector
+
 
     def __get_img_to_numpy(self, img):
         pic = PIL.Image.open(os.path.join(self.data_path, f'{img}.jpg'))
         return np.array(pic)
-
-
-'''
-not used anymore?
-    def __str_normalize_batch(self, X, list_imgs_temp):
-        ###TBD
-        #X here is np array of dim (batch_size, 450, 600, 3)
-        #list_imgs_temp is a list like that: [['ISIC_0024306', 'male', '<50;inf)'], ['ISIC_0024307', 'female', '<50;inf)'], ['ISIC_0024308', 'female', '<0;50>']]
-        #we need to normalize X stratifying by values from list_imgs_temp
-        return X
-'''
