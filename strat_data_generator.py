@@ -67,8 +67,8 @@ class DataGenerator(keras.utils.Sequence):
             y[i] = self.labels[img[0]]
 
         # finish adding second input
-        # return [X, meta_X], keras.utils.to_categorical(y, num_classes=self.n_classes)
-        return [X, meta_X], y  # just return vector
+        return [X, meta_X], keras.utils.to_categorical(y, num_classes=self.n_classes)
+        # return [X, meta_X], y  # just return vector
 
     def __get_img_to_numpy(self, img):
         pic = PIL.Image.open(os.path.join(self.data_path, f'{img}.jpg'))

@@ -15,19 +15,25 @@ class LDAMLoss():
         self.weight = weight
         self.n_classes = len(cls_num_list)
 
-    def __call__(self, x, target):
+    def __call__(self, target, x):
         # this performs one hot encoding of target
         # index = tf.zeros_like(x, dtype=tf.float32)
         # update = tf.constant([[1]], dtype=tf.float32)
         # index = tf.reshape(index, (-1, 1))
         # print("!!!!!!!!!!!!!!!!!!!!!!", index)
         # index_float = tf.tensor_scatter_nd_update(index, target, update)
-        index_float = tf.one_hot(target, self.n_classes)
+
+        # target = tf.cast(target, tf.uint8)
+        # index_float = tf.one_hot(target, self.n_classes)
+        index_float = target
 
         batch_m = tf.matmul(self.m_list[None, :], tf.transpose(index_float))
         print("batch_m :", batch_m)
         batch_m = tf.reshape(batch_m, (-1, 1))
         print("batch_m :", batch_m)
+
+        # x = tf.cast(x, tf.float32)
+
         x_m = x - batch_m
         print("x_m :", x_m)
 
@@ -45,4 +51,4 @@ class LDAMLoss():
         print("labels : \n", labels, "\n logits : \n", logits)
         loss = tf.nn.softmax_cross_entropy_with_logits(
             labels=labels, logits=logits*self.s)
-        return tf.math.reduce_mean(loss)
+        return tf.reduce_mean(loss)

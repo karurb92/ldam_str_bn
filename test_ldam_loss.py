@@ -13,13 +13,13 @@ ldam = losses.LDAMLoss(cls_num_list=cls_num_list)
 
 network_outputs = tf.constant(
     [[.3, .7, 0, 0, 0, 0, 0, 0, 0, 0], [.3, .7, 0, 0, 0, 0, 0, 0, 0, 0]])
-targets = tf.constant([1, 0])
+targets = tf.one_hot([1, 0], len(cls_num_list))
 
 # network_outputs = tf.constant(
 #     [[.3, .7, 0, 0, 0, 0, 0, 0, 0, 0]])
 # targets = tf.constant([1])
 
-loss = ldam(network_outputs, targets)
+loss = ldam(targets, network_outputs)
 print("loss is", loss)
 
 

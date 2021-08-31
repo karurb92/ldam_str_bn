@@ -10,9 +10,10 @@ from utils_sc import *
 import pandas as pd
 import tensorflow as tf
 from tensorflow import keras
-from models.resnet import res_net_model
+from models.resnet import res_net_model, test_stratbn_model
 from strat_data_generator import DataGenerator
 from losses import *
+import datetime as dt
 
 # parse args here
 #imb_ratio, strat_dims, data_path, train_split, batch_size
@@ -25,7 +26,7 @@ def main():
     imb_ratio = 10
     strat_dims = ['age_mapped']
     train_split = 0.8
-    batch_size = 2
+    batch_size = 16
 
     metadf = load_metadf(project_path)
     data_train, data_val, labels, strat_classes_num = draw_data(
@@ -43,23 +44,30 @@ def main():
     validation_generator = DataGenerator(
         data_val, labels, strat_classes_num, imgs_path, **params_generator)
 
-    # callbacks = [
-    #     # Write TensorBoard logs to `./logs` directory
-    #     keras.callbacks.TensorBoard(
-    #         log_dir='./log/{}'.format(dt.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")), write_images=True),
-    # ]
+    callbacks = [
+        # Write TensorBoard logs to `./logs` directory
+        keras.callbacks.TensorBoard(
+            log_dir='./log/{}'.format(dt.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")), write_images=True),
+    ]
 
-    model = res_net_model(strat_classes_num)
+    model = test_stratbn_model(strat_classes_num)
+    print(model.summary())
+
+    # out = model((tf.ones((2, 450, 600, 3)), tf.ones(2, 1)))
+    # print(out)
+    # return
+
     # ADD ARG strat_classes_num
+
+    # we need to know how frequent every class is
     cls_num_list = [1, 1, 1, 1, 1, 1, 1]
+
     model.compile(optimizer=keras.optimizers.Adam(),
                   loss=LDAMLoss(cls_num_list),
                   metrics=['accuracy'])
-    # KAROL: WE HAVE TO USE fit_generator()
-    # model.fit(train_dataset, epochs=30, steps_per_epoch=195,
-    #           validation_data=valid_dataset,
-    #           validation_steps=3, callbacks=callbacks)
-    model.fit(training_generator, validation_data=validation_generator)
+
+    model.fit(training_generator, validation_data=validation_generator,
+              validation_steps=3, epochs=10, callbacks=callbacks)
 
 # further training from here
 
