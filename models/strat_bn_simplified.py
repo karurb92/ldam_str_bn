@@ -244,7 +244,7 @@ class StratBN(tf.keras.layers.Layer):
         input_shape = inputs_data.shape
         ndims = len(input_shape)
         reduction_axes = [i for i in range(ndims) if i not in self.axis]
-        print(reduction_axes)
+        #print(reduction_axes)
 
         # Broadcasting only necessary for single-axis batch norm where the axis is
         # not the last dimension
@@ -265,16 +265,14 @@ class StratBN(tf.keras.layers.Layer):
             inputs_subdata = tf.boolean_mask(
                 inputs_data, inputs_strat[:, strat_class])
 
-            # tf.print(inputs_subdata)
-
-            tf.debugging.check_numerics(
-                inputs_subdata, 'problem in data', name=None)
+            if inputs_subdata.shape[0]==0:
+                continue
 
             sub_gamma = self.gamma[strat_class]
             sub_beta = self.beta[strat_class]
 
-            tf.print(sub_gamma)
-            tf.print(sub_beta)
+            #tf.print(sub_gamma)
+            #tf.print(sub_beta)
 
             scale, offset = _broadcast(sub_gamma), _broadcast(sub_beta)
 
@@ -292,12 +290,6 @@ class StratBN(tf.keras.layers.Layer):
                     reduction_axes,
                     keep_dims=keep_dims)
 
-                '''
-                this commented part below is not working properly. my guess is that we're passing tf.Tensor instead of tf.Variable as variable (because we're taking a slice only).
-                one idea could be to define moving avg and variance as array of tf.Variables to be updated separately in each loop?
-                maybe if it's too difficult to overcome this, we can use shape (3) instead of (strat_classes_num, 3) for moving mean and var
-                '''
-
             mean = tf.cast(mean, inputs_subdata.dtype)
             variance = tf.cast(variance, inputs_subdata.dtype)
             offset = tf.cast(offset, inputs_subdata.dtype)
@@ -308,7 +300,7 @@ class StratBN(tf.keras.layers.Layer):
             new_variances = tf.concat(
                 [new_variances, tf.reshape(variance, (1, -1))], axis=0)
 
-            print(mean, variance, offset, scale)
+            #print(mean, variance, offset, scale)
 
             outputs_subdata = tf.nn.batch_normalization(inputs_subdata, _broadcast(mean),
                                                         _broadcast(
@@ -318,11 +310,12 @@ class StratBN(tf.keras.layers.Layer):
                 outputs_subdata = tf.cast(outputs_subdata, inputs_dtype)
 
             output = tf.concat([output, outputs_subdata], axis=0)
-            print(outputs_subdata)
+            #print(outputs_subdata)
 
         # this could be used for partial updates of the moving mean and variances
         # however we decided to store all moving means variances in a temporary array
         # and do one final update in the end
+
         input_batch_size = None
 
         def _do_update(var, value):
@@ -335,7 +328,8 @@ class StratBN(tf.keras.layers.Layer):
         def variance_update():
             return _do_update(self.moving_variance, new_variances)
 
-        self.add_update(mean_update)
-        self.add_update(variance_update)
+        if training==True:
+            self.add_update(mean_update)
+            self.add_update(variance_update)
 
         return output
