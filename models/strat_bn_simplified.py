@@ -265,6 +265,11 @@ class StratBN(tf.keras.layers.Layer):
             inputs_subdata = tf.boolean_mask(
                 inputs_data, inputs_strat[:, strat_class])
 
+            # tf.print(inputs_subdata)
+
+            tf.debugging.check_numerics(
+                inputs_subdata, 'problem in data', name=None)
+
             sub_gamma = self.gamma[strat_class]
             sub_beta = self.beta[strat_class]
 

@@ -66,8 +66,11 @@ def main():
                   loss=LDAMLoss(cls_num_list),
                   metrics=['accuracy'])
 
-    model.fit(training_generator, validation_data=validation_generator,
-              validation_steps=3, epochs=10, callbacks=callbacks)
+    # model.fit(training_generator, validation_data=validation_generator,
+    #           validation_steps=3, epochs=10, callbacks=callbacks)
+
+    # no validation for now
+    model.fit(training_generator, epochs=10, callbacks=callbacks)
 
 # further training from here
 
