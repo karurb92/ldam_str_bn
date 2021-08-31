@@ -45,13 +45,16 @@ def draw_data(metadf, imb_ratio, strat_dims=['sex', 'age_mapped'], train_split =
   max_n = check_max_n(df, y)
   main_class = df[['image_id', y]].groupby(y).agg('count').sort_values(by='image_id', ascending=False).index[0]
 
+  dict_reverse = dict([value[0], key] for key, value in config_sc.classes.items())
+  df = df.merge(pd.DataFrame(dict_reverse.items()), left_on='dx', right_on=0)
+  observations = len(df)
+  cls_num_list = list(df.groupby(1).size()/observations)
+
   df_main = df[df[y]==main_class].sample(math.floor(1.0*imb_ratio/(imb_ratio+1)*max_n))
   df_rest = df[df[y]!=main_class].sample(math.floor(1.0/(imb_ratio+1)*max_n))
   df_drawn = pd.concat([df_main, df_rest])
 
-  dict_reverse = dict([value[0], key] for key, value in config_sc.classes.items())
-  df_labels = df_drawn.merge(pd.DataFrame(dict_reverse.items()), left_on='dx', right_on=0)
-  labels = pd.Series(df_labels[1].values, index = df_labels['image_id']).to_dict()
+  labels = pd.Series(df_drawn[1].values, index = df_drawn['image_id']).to_dict()
 
   columns = ['image_id', 'strat_class']
   df_drawn = df_drawn[columns]
@@ -63,7 +66,7 @@ def draw_data(metadf, imb_ratio, strat_dims=['sex', 'age_mapped'], train_split =
   data_train = df_train.values.tolist()
   data_val = df_val.values.tolist()
 
-  return data_train, data_val, labels, strat_classes_num
+  return data_train, data_val, labels, strat_classes_num, cls_num_list
 
 def load_metadf(data_path):
   metadf = pd.read_csv(f'{data_path}/{config_sc.file_imgs_metadata}')
