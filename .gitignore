@@ -2,4 +2,5 @@ env/
 data/
 local_work/
 playground.ipynb
-__pycache__/
+*/__pycache__/*
+log/
