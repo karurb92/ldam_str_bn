@@ -22,7 +22,7 @@ class LDAMLoss():
         x_m = x - batch_m
 
         # if condition is true, return x_m[index], otherwise return x[index]
-        index_bool = tf.cast(index_float, bool)
+        index_bool = tf.cast(index_float, tf.bool)
         output = tf.where(index_bool, x_m, x)
 
         labels = index_float
