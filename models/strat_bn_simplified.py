@@ -244,7 +244,7 @@ class StratBN(tf.keras.layers.Layer):
         input_shape = inputs_data.shape
         ndims = len(input_shape)
         reduction_axes = [i for i in range(ndims) if i not in self.axis]
-        #print(reduction_axes)
+        # print(reduction_axes)
 
         # Broadcasting only necessary for single-axis batch norm where the axis is
         # not the last dimension
@@ -265,20 +265,18 @@ class StratBN(tf.keras.layers.Layer):
             inputs_subdata = tf.boolean_mask(
                 inputs_data, inputs_strat[:, strat_class])
 
-            if inputs_subdata.shape[0]==0:
+            if tf.size(inputs_subdata) == 0:
                 continue
 
             sub_gamma = self.gamma[strat_class]
             sub_beta = self.beta[strat_class]
 
-            #tf.print(sub_gamma)
-            #tf.print(sub_beta)
+            # tf.print(sub_gamma)
+            # tf.print(sub_beta)
 
             scale, offset = _broadcast(sub_gamma), _broadcast(sub_beta)
 
-            # training_value = control_flow_util.constant_value(training)
-            training_value = training
-            if training_value == False:  # pylint: disable=singleton-comparison,g-explicit-bool-comparison
+            if training == False:  # pylint: disable=singleton-comparison,g-explicit-bool-comparison
                 print('Not training so use moving mean and var')
                 mean, variance = self.moving_mean[strat_class], self.moving_variance[strat_class]
             else:
@@ -310,7 +308,7 @@ class StratBN(tf.keras.layers.Layer):
                 outputs_subdata = tf.cast(outputs_subdata, inputs_dtype)
 
             output = tf.concat([output, outputs_subdata], axis=0)
-            #print(outputs_subdata)
+            # print(outputs_subdata)
 
         # this could be used for partial updates of the moving mean and variances
         # however we decided to store all moving means variances in a temporary array
@@ -328,7 +326,7 @@ class StratBN(tf.keras.layers.Layer):
         def variance_update():
             return _do_update(self.moving_variance, new_variances)
 
-        if training==True:
+        if training == True:
             self.add_update(mean_update)
             self.add_update(variance_update)
 
