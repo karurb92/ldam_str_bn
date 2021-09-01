@@ -26,7 +26,7 @@ def main():
     imb_ratio = 10
     strat_dims = ['age_mapped']
     train_split = 0.8
-    batch_size = 32
+    batch_size = 1
     data_path = project_path
 
     metadf = load_metadf(data_path)
@@ -34,6 +34,7 @@ def main():
         metadf, imb_ratio, strat_dims, train_split)
 
     print(strat_classes_num)
+    print(cls_num_list)
 
     params_generator = {'dim': (450, 600, 3),
                         'batch_size': batch_size,
@@ -46,31 +47,20 @@ def main():
         data_val, labels, strat_classes_num, imgs_path, **params_generator)
 
     callbacks = [
-        # Write TensorBoard logs to `./logs` directory
         keras.callbacks.TensorBoard(
             log_dir='./log/{}'.format(dt.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")), write_images=True, histogram_freq=1),
     ]
 
+    # test_stratbn_model
     model = res_net_model(strat_classes_num, num_res_net_blocks=2)
     print(model.summary())
-
-    # out = model((tf.ones((2, 450, 600, 3)), tf.ones(2, 1)))
-    # print(out)
-
-    # we need to know how frequent every class is
-    # cls_num_list = [1, 1, 1, 1, 1, 1, 1]
 
     model.compile(optimizer=keras.optimizers.Adam(),
                   loss=LDAMLoss(cls_num_list),
                   metrics=['accuracy'])
 
-    # model.fit(training_generator, validation_data=validation_generator,
-    #           validation_steps=3, epochs=10, callbacks=callbacks)
-
-    # no validation for now
     model.fit(training_generator, epochs=10,
               validation_data=validation_generator, callbacks=callbacks)
-    # model.fit_generator(training_generator, epochs=10, validation_data=validation_generator, callbacks=callbacks)
 
     model.save(data_path)
 
