@@ -2,7 +2,6 @@ import tensorflow as tf
 from keras import constraints
 from keras import initializers
 from keras import regularizers
-from keras.utils import control_flow_util
 from keras import backend
 
 
