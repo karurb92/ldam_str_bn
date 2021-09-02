@@ -38,8 +38,8 @@ class TestStratBNLoss(unittest.TestCase):
 
         # we use round because of th epsilon and float imprecisions
         # so actualy values are more like -0.997
-        self.assertTrue((np.around(out[0]) == -1).all())
-        self.assertTrue((np.around(out[1]) == 1).all())
+        self.assertTrue((np.around(out[0], decimals=2) == -1).all())
+        self.assertTrue((np.around(out[1], decimals=2) == 1).all())
 
     # same as above but now we stratify the images separately
 
