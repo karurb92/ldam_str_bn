@@ -51,7 +51,7 @@ def main():
 
     model.compile(optimizer=keras.optimizers.Adam(),
                   loss=keras.losses.CategoricalCrossentropy(from_logits=True),
-                  metrics=['accuracy', 'precision', 'recall'])
+                  metrics=['accuracy'])
 
     model.fit(training_generator, epochs=10,
               validation_data=validation_generator, callbacks=callbacks)
