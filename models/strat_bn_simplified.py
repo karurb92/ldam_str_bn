@@ -19,6 +19,16 @@ input2 = tf.constant([[1., 0., 0.], [1., 0., 0.], [
 strat_classes_num = 2
 '''
 
+'''
+This is a simplified version of the standard Tensorflow implementation for the
+BatchNormalization layers which can be found here:
+https://github.com/keras-team/keras/blob/master/keras/layers/normalization/batch_normalization.py#L1113-L1253
+
+We simplified it by removing parts we didn't need such as virtual batches and fusing.
+
+Additionally, we added in the functionality for stratification.
+'''
+
 
 class StratBN(tf.keras.layers.Layer):
 
@@ -155,8 +165,6 @@ class StratBN(tf.keras.layers.Layer):
             ]
             param_shape = [input_shape_strat[1]] + param_shape
 
-        print(param_shape)
-
         self.gamma = self.add_weight(
             name='gamma',
             shape=param_shape,
@@ -256,23 +264,28 @@ class StratBN(tf.keras.layers.Layer):
                 return tf.reshape(v, broadcast_shape)
             return v
 
+        # empty arrays that will be used to store the intermediary results
         output = tf.zeros([0, *inputs_data.shape[1:]])
         new_means = tf.zeros([0, input_shape[self.axis[0]]])
         new_variances = tf.zeros([0, input_shape[self.axis[0]]])
 
+        # the stratification vector is one hot encoded
         for strat_class in range(inputs_strat.shape[1]):
 
+            # here we subset the batch based on the stratification variables
             inputs_subdata = tf.boolean_mask(
                 inputs_data, inputs_strat[:, strat_class])
 
+            # covers edge case:
+            # it might be that there is no example in the batch for a given
+            # stratification variable
+            # example: we stratify on sex but there are only men in the batch
+            # so the subbatch for women will be empty -> skip to avoid NaNs
             if tf.size(inputs_subdata) == 0:
                 continue
 
             sub_gamma = self.gamma[strat_class]
             sub_beta = self.beta[strat_class]
-
-            # tf.print(sub_gamma)
-            # tf.print(sub_beta)
 
             scale, offset = _broadcast(sub_gamma), _broadcast(sub_beta)
 
@@ -280,8 +293,6 @@ class StratBN(tf.keras.layers.Layer):
                 print('Not training so use moving mean and var')
                 mean, variance = self.moving_mean[strat_class], self.moving_variance[strat_class]
             else:
-                # Some of the computations here are not necessary when training==False
-                # but not a constant. However, this makes the code simpler.
                 keep_dims = len(self.axis) > 1
                 mean, variance = self._moments(
                     tf.cast(inputs_subdata, self._param_dtype),
@@ -293,40 +304,35 @@ class StratBN(tf.keras.layers.Layer):
             offset = tf.cast(offset, inputs_subdata.dtype)
             scale = tf.cast(scale, inputs_subdata.dtype)
 
+            # store the means and variances of the sub batches
             new_means = tf.concat(
                 [new_means, tf.reshape(mean, (1, -1))], axis=0)
             new_variances = tf.concat(
                 [new_variances, tf.reshape(variance, (1, -1))], axis=0)
 
-            #print(mean, variance, offset, scale)
-
-            outputs_subdata = tf.nn.batch_normalization(inputs_subdata, _broadcast(mean),
-                                                        _broadcast(
-                variance), offset, scale,
-                self.epsilon)
+            # finally do the batch norm
+            outputs_subdata = tf.nn.batch_normalization(inputs_subdata, _broadcast(
+                mean), _broadcast(variance), offset, scale, self.epsilon)
             if inputs_dtype in (tf.float16, tf.bfloat16):
                 outputs_subdata = tf.cast(outputs_subdata, inputs_dtype)
 
+            # incrementally concatenate all subbatches to end up with the final batch
             output = tf.concat([output, outputs_subdata], axis=0)
-            # print(outputs_subdata)
 
-        # this could be used for partial updates of the moving mean and variances
-        # however we decided to store all moving means variances in a temporary array
-        # and do one final update in the end
-
-        input_batch_size = None
-
-        def _do_update(var, value):
-            """Compute the updates for mean and variance."""
-            return self._assign_moving_average(var, value, self.momentum, input_batch_size)
-
-        def mean_update():
-            return _do_update(self.moving_mean, new_means)
-
-        def variance_update():
-            return _do_update(self.moving_variance, new_variances)
-
+        # only update moving mean and variance when training
         if training == True:
+            input_batch_size = None
+
+            def _do_update(var, value):
+                """Compute the updates for mean and variance."""
+                return self._assign_moving_average(var, value, self.momentum, input_batch_size)
+
+            def mean_update():
+                return _do_update(self.moving_mean, new_means)
+
+            def variance_update():
+                return _do_update(self.moving_variance, new_variances)
+
             self.add_update(mean_update)
             self.add_update(variance_update)
 
