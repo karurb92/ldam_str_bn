@@ -16,6 +16,7 @@ class LDAMLoss():
         self.n_classes = len(cls_num_list)
 
     def __call__(self, target, x):
+        # contrary to pytorch implemenation, our labels are already one hot encoded
         index_float = target
         batch_m = tf.matmul(self.m_list[None, :], tf.transpose(index_float))
         batch_m = tf.reshape(batch_m, (-1, 1))
