@@ -1,5 +1,3 @@
-# model class here
-import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
 from models.strat_bn_simplified import StratBN
@@ -17,28 +15,6 @@ def res_net_block(input_data, filters, conv_size):
     x = layers.Add()([x, input_data])
     x = layers.Activation('relu')(x)
     return x
-
-
-def test_stratbn_model(n_strat_classes, n_classes=7,):
-    inputs1 = keras.Input(shape=(450, 600, 3))
-    inputs2 = keras.Input(shape=(n_strat_classes,))
-    x = StratBN()([inputs1, inputs2])
-
-    x = layers.Conv2D(1, 3, activation='relu')(x)
-    x = layers.MaxPooling2D(3)(x)
-
-    x = layers.Conv2D(1, 3, activation='relu')(x)
-    x = layers.MaxPooling2D(3)(x)
-
-    x = layers.Conv2D(1, 3, activation='relu')(x)
-    x = layers.MaxPooling2D(3)(x)
-
-    x = layers.Conv2D(1, 3, activation='relu')(x)
-    x = layers.MaxPooling2D(3)(x)
-
-    x = layers.Flatten()(x)
-    output = layers.Dense(n_classes)(x)
-    return keras.Model([inputs1, inputs2], output)
 
 
 def res_net_model(n_strat_classes, n_classes=7, num_res_net_blocks=2, use_stratification=False):
