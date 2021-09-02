@@ -10,20 +10,14 @@ from utils_sc import *
 import pandas as pd
 import tensorflow as tf
 from tensorflow import keras
-from models.resnet import res_net_model, test_stratbn_model
+from models.resnet import res_net_model
 from strat_data_generator import DataGenerator
 from losses import *
 import datetime as dt
 
-# parse args here
-#imb_ratio, strat_dims, data_path, train_split, batch_size
-
 
 def main():
-
-    # before we feed all imgs here, we should earlier decide on some constant test set
-    # assess on imbalance or balance?
-    imb_ratio = 10
+    imb_ratio = imb_ratios[1]
     strat_dims = ['age_mapped']
     train_split = 0.8
     batch_size = 1
@@ -51,13 +45,12 @@ def main():
             log_dir='./log/{}'.format(dt.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")), write_images=True, histogram_freq=1),
     ]
 
-    # test_stratbn_model
     model = res_net_model(strat_classes_num, num_res_net_blocks=2)
     print(model.summary())
 
     model.compile(optimizer=keras.optimizers.Adam(),
                   loss=LDAMLoss(cls_num_list),
-                  metrics=['accuracy'])
+                  metrics=['accuracy', 'precision', 'recall'])
 
     model.fit(training_generator, epochs=10,
               validation_data=validation_generator, callbacks=callbacks)
