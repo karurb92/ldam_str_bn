@@ -26,8 +26,6 @@ ex) [HAM_0000118, ISIC_0027419 ,bkl, histo, 80.0, male, scalp]
 
 
 
----
-
 ### Topic & Tasks
 
 ---
@@ -85,21 +83,29 @@ We made medical imaging dataset to be highly imbalanced with implemented data ge
 
 ---
 
-* data - 기존의 데이터와 비교해서 얼마나(ex 10)불균형성을 넣었을 때 데이터가 어떻게 변했는지 비교
+* Imbalanced Dataset
+
+  > Imbalance ratio : 10
 
 * Stratified Batch Normalization
 
   > batch size 32
 
+  Changes of `beta`, `gamma`, `moving_mean`, `movng_variance`
+
   ![](C:\Users\SECn\Desktop\ldam_str_bn\readme_images\training_batch32.jpg)
 
 * Training
 
-  * Loss가 줄었는지
-  * test data -> 일부러 틀린것 했을 떄 정확하게 결과를 도출하는지(정확성)
-  * Assesment 평가
-  * Epoch/batch size에 따른 결과 그래프 + 간략 insight
-  * 전체적으로 imbalanced vs balanced 비교 그래프
+  * Decreasing the loss
+
+* Test
+
+  * Correct prediction with the wrong labels
+  * Changing Epoch/batch size
+  * Imbalanced data vs Balanced data
+
+* Assessment 
 
   
 
