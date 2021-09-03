@@ -91,7 +91,7 @@ We artificially made medical imaging dataset to be highly imbalanced (with diffe
   >
   > Without LDAM loss 
 
-  * Epoch accarucy
+  * Epoch accuracy
 
     <img src=".\readme_images\strat_bn_without_ldam_epoch_acc.jpg">
 
@@ -103,7 +103,7 @@ We artificially made medical imaging dataset to be highly imbalanced (with diffe
 
     <img src=".\readme_images\strat_bn_without_ldam_beta.jpg">
 
-  * ``gamma`
+  * `gamma`
 
     <img src=".\readme_images\strat_bn_without_ldam_gamma.jpg">
 
