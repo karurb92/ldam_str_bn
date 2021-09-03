@@ -1,28 +1,19 @@
-# config
+### This file contains a bunch of global variables, which are used by few other scripts
 import os
 
+# specifying project path (to your repo add /local_work/all_imgs)
+# we stored metadata in '/local_work' and all the images in '/local_work/all_imgs'
+# however, paths can also be specified inside training scripts
 project_path = os.path.join(os.path.abspath(os.getcwd()), 'local_work')
 imgs_path = os.path.join(project_path, 'all_imgs')
 file_imgs = ['HAM10000_images_part_1.zip', 'HAM10000_images_part_2.zip']
 file_imgs_metadata = 'HAM10000_metadata.csv'
 
-# for this ratios we will train different models. it's used to assess n of rows to be drawn from the data (to ensure every model has same n)
+# if one would like to compare model with use of different imbalance ratios, they all need to be specified here
+# knowing the list before the training is required to ensure drawing similar-sized datasets (for better comparison)
 imb_ratios = [1, 10, 100]
 
-'''
-to be deleted?
-# in case we want to work on simplified problem. dict after short research, might need confirmation
-y_mapping = {
-    'bkl': 'benign',
-    'nv': 'benign',
-    'df': 'benign',
-    'mel': 'malignant & deadly',
-    'vasc': 'benign',
-    'bcc': 'malignant & safe',
-    'akiec': 'benign'
-}
-'''
-
+# dictionary of data labels
 classes = {
     4: ('nv', ' melanocytic nevi'),
     6: ('mel', 'melanoma'),
@@ -33,7 +24,7 @@ classes = {
     3: ('df', 'dermatofibroma')
 }
 
-# we could use also breakpoints at 30/40,60
+# breakpoints for binning of age - such mapped age can later be more effectively used for stratification
 age_mapping = {
     50.0: '<0;50>', 999.0: '<50;inf)'
 }
