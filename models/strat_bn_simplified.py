@@ -1,22 +1,5 @@
-import tensorflow as tf
-from keras import constraints
-from keras import initializers
-from keras import regularizers
-from keras import backend
-
-
 # Source:
 # https://www.tensorflow.org/tutorials/customization/custom_layers#implementing_custom_layers
-
-
-'''
-test it with:
-input1 = tf.constant([[1., 10., 100.], [2., 20., 200.], [
-                     3., 30., 300.], [4., 40., 400.], [5., 50., 500.]])
-input2 = tf.constant([[1., 0., 0.], [1., 0., 0.], [
-                     1., 0., 0.], [0., 1., 0.], [0., 1., 0.]])
-strat_classes_num = 2
-'''
 
 '''
 This is a simplified version of the standard Tensorflow implementation for the
@@ -27,6 +10,17 @@ We simplified it by removing parts we didn't need such as virtual batches and fu
 
 Additionally, we added in the functionality for stratification.
 '''
+
+# our contribution:
+# - initializing ('build' function) with use of metadata which is passed separately. gammas, betas, moving mean and variance are now of shape (3, number of stratification classes)
+# - normalizing separately for stratification classes. 'call' function cuts batch into subbatches, normalize them separately using different sets of betas and gammas, and in the end combines them back into output batch
+
+
+import tensorflow as tf
+from keras import constraints
+from keras import initializers
+from keras import regularizers
+from keras import backend
 
 
 class StratBN(tf.keras.layers.Layer):
@@ -105,8 +99,7 @@ class StratBN(tf.keras.layers.Layer):
         if isinstance(training, int):
             training = bool(training)
         if not self.trainable:
-            # When the layer is not trainable, it overrides the value passed from
-            # model.
+            # When the layer is not trainable, it overrides the value passed from model.
             training = False
         return training
 
@@ -118,8 +111,7 @@ class StratBN(tf.keras.layers.Layer):
         else:
             return self.dtype or tf.float32
 
-    # build, where you know the shapes of the input tensors and can do the rest of the initialization
-
+    # layer building function, where you know the shapes of the input tensors and can do the rest of the initialization
     def build(self, input_shape):
         input_shape_data = tf.TensorShape(input_shape[0])
         input_shape_strat = tf.TensorShape(input_shape[1])
@@ -240,11 +232,9 @@ class StratBN(tf.keras.layers.Layer):
             # In particular, it's very easy for variance to overflow in float16 and
             # for safety we also choose to cast bfloat16 to float32.
             inputs_strat = tf.cast(inputs_strat, tf.float32)
+
         inputs_dtype = inputs_data.dtype.base_dtype
         if inputs_dtype in (tf.float16, tf.bfloat16):
-            # Do all math in float32 if given 16-bit inputs for numeric stability.
-            # In particular, it's very easy for variance to overflow in float16 and
-            # for safety we also choose to cast bfloat16 to float32.
             inputs_data = tf.cast(inputs_data, tf.float32)
 
         # Compute the axes along which to reduce the mean / variance
@@ -276,8 +266,7 @@ class StratBN(tf.keras.layers.Layer):
                 inputs_data, inputs_strat[:, strat_class])
 
             # covers edge case:
-            # it might be that there is no example in the batch for a given
-            # stratification variable
+            # it might be that there is no example in the batch for a given stratification class
             # example: we stratify on sex but there are only men in the batch
             # so the subbatch for women will be empty -> skip to avoid NaNs
             if tf.size(inputs_subdata) == 0:
