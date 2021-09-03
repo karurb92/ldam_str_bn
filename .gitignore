@@ -4,4 +4,3 @@ local_work/
 playground.ipynb
 */__pycache__/*
 log/
-*.log
