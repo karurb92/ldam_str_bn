@@ -58,6 +58,6 @@ def main():
 
     model.save(data_path)
 
-
+  
 if __name__ == '__main__':
     main()

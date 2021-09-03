@@ -54,7 +54,7 @@ def main():
 
     model.fit(training_generator, epochs=10,
               validation_data=validation_generator, callbacks=callbacks)
-
+    
     model.save(data_path)
 
 

@@ -87,29 +87,43 @@ We artificially made medical imaging dataset to be highly imbalanced (with diffe
 
 * Stratified Batch Normalization
 
-  > batch size 32
+  > Batch size 32
+  >
+  > Without LDAM loss 
 
-  Changes of `beta`, `gamma`, `moving_mean`, `movng_variance`
+  * Epoch accarucy
 
-  <img src=".\readme_images\training_batch32.jpg">
+    <img src=".\readme_images\strat_bn_without_ldam_epoch_acc.jpg">
 
-* Training
+  * Epoch losses
 
-  >  Decreasing the loss
+    <img src=".\readme_images\strat_bn_without_ldam_epoch_loss.jpg">
 
-  show kind of line graph of loss changes
+  * `beta`
 
-  > Changing Epoch/batch size
+    <img src=".\readme_images\strat_bn_without_ldam_beta.jpg">
 
-  > Imbalanced data vs Balanced data
+  * ``gamma`
 
-* Test
+    <img src=".\readme_images\strat_bn_without_ldam_gamma.jpg">
 
-  > Correct prediction with the wrong labels
+  *  `moving_mean`
 
-  show wrong label data sample and show the output of it.
+    <img src=".\readme_images\strat_bn_without_ldam_moving_mean.jpg">
 
-  >  Test with real data?
+  * ``moving_variance`
+
+    <img src=".\readme_images\strat_bn_without_ldam_moving_var.jpg">
+
+  
+
+* Imbalanced data vs Balanced data
+
+* Imbalanced ratio ?? vs Imbalanced ratio ??
+
+* With LDAM vs without LDAM
+
+* With Stratified BN vs without Stratified BN
 
 
 
