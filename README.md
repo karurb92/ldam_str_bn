@@ -37,7 +37,7 @@ When it comes to dealing with heavily imbalanced dataset, we focused on two appr
  * Stratified Batch Normalization
     * compared to using batch normalization, significantly increases the accuracy by feature normalization per sex and localization? and by reducing the correlations
 
-We made medical imaging dataset to be highly imbalanced with implemented data generator function. We implemented stratified batch normalization within a ResNet model and train it with label-distribution-aware loss function(LDAM). After the implementation, we perform unit test to the loss function and stratified batch normalization to check both function correctly.
+We made medical imaging dataset to be highly imbalanced with implemented `strat_data_generator` function. We implemented stratified batch normalization within a ResNet model and train it with label-distribution-aware loss function(LDAM). After the implementation, we perform unit test by `unittest` python module to the loss function and stratified batch normalization to check both function correctly.
 
 
 
@@ -64,7 +64,7 @@ We made medical imaging dataset to be highly imbalanced with implemented data ge
 
 ---
 
-1. Data Preprocessing - implemented data generator to make imaging dataset imbalanced
+1. Data Preprocessing - implemented `strat_data_generator` to make imaging dataset imbalanced
    * add explanation if you want
 
 2. Implementing LDAM loss with tensorflow
@@ -87,6 +87,8 @@ We made medical imaging dataset to be highly imbalanced with implemented data ge
 
   > Imbalance ratio : 10
 
+  guess show some data distribution image here.
+
 * Stratified Batch Normalization
 
   > batch size 32
@@ -97,17 +99,21 @@ We made medical imaging dataset to be highly imbalanced with implemented data ge
 
 * Training
 
-  * Decreasing the loss
+  >  Decreasing the loss
+
+  show kind of line graph of loss changes
+
+  > Changing Epoch/batch size
+
+  > Imbalanced data vs Balanced data
 
 * Test
 
-  * Correct prediction with the wrong labels
-  * Changing Epoch/batch size
-  * Imbalanced data vs Balanced data
+  > Correct prediction with the wrong labels
 
-* Assessment 
+  show wrong label data sample and show the output of it.
 
-  
+  >  Test with real data?
 
 ### References
 
