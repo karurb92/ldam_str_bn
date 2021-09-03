@@ -1,13 +1,9 @@
-# We set up data generator for later use by .fit_generator()
-# It also performs reformatting pics
+# definition of the data generator used for training
 # loosely inspired by: https://stanford.edu/~shervine/blog/keras-how-to-generate-data-on-the-fly
 
-'''
-#test it with:
-list_imgs = [['ISIC_0024306', 'male', '<50;inf)'], ['ISIC_0024307', 'female', '<50;inf)'], ['ISIC_0024308', 'female', '<0;50>']]
-labels = {'ISIC_0024306': 2, 'ISIC_0024307': 3, 'ISIC_0024308': 4}
-#make sure batch_size <= number of images
-'''
+# our contributions:
+# - yielding metadata for stratification purposes
+# - performing img->numpy step
 
 import numpy as np
 from tensorflow import keras
@@ -17,7 +13,7 @@ import os
 
 
 class DataGenerator(keras.utils.Sequence):
-    # Generates data for Keras
+
     def __init__(self, list_imgs, labels, strat_classes_num, data_path, batch_size=32, dim=(450, 600, 3), n_classes=7, shuffle=True):
         self.dim = dim
         self.batch_size = batch_size
@@ -29,37 +25,39 @@ class DataGenerator(keras.utils.Sequence):
         self.shuffle = shuffle
         self.on_epoch_end()
 
+    # returns number of batches per epoch
     def __len__(self):
-        # Denotes the number of batches per epoch
         return int(np.floor(len(self.list_imgs) / self.batch_size))
 
+    # generate one batch of data
     def __getitem__(self, index):
-        # Generate one batch of data
-        # Generate indexes of the batch
+        
+        # generates indexes of the batch
         indexes = self.indexes[index*self.batch_size:(index+1)*self.batch_size]
 
-        # Find list of IDs
+        # takes list of image IDs
         list_imgs_temp = [self.list_imgs[k] for k in indexes]
 
-        # Generate data
+        # generates data for given IDs
         X, y = self.__data_generation(list_imgs_temp)
 
         return X, y
 
+    # updates indexes after each epoch. thanks to shuffling the training loop doesnt see the same batches in each epoch
     def on_epoch_end(self):
-        # Updates indexes after each epoch
         self.indexes = np.arange(len(self.list_imgs))
         if self.shuffle == True:
             np.random.shuffle(self.indexes)
 
+    # generates data containing batch_size samples
     def __data_generation(self, list_imgs_temp):
-        # Generates data containing batch_size samples
 
+        # sets up empty arrays in proper shapes
         X = np.empty((self.batch_size, *self.dim))
         meta_X = np.empty((self.batch_size, self.strat_classes_num))
         y = np.empty((self.batch_size), dtype=int)
 
-        # Generate data
+        # generates data, according to what was earlier returned by draw_data()
         for i, img in enumerate(list_imgs_temp):
             X[i, ] = self.__get_img_to_numpy(img[0])
             meta_X[i, ] = [img[1] == el for el in range(self.strat_classes_num)]
@@ -69,7 +67,7 @@ class DataGenerator(keras.utils.Sequence):
 
         return [X, meta_X], keras.utils.to_categorical(y, num_classes=self.n_classes)
 
-
+    # takes one image, spits out 450x600x3 numpy
     def __get_img_to_numpy(self, img):
         pic = PIL.Image.open(os.path.join(self.data_path, f'{img}.jpg'))
         return np.array(pic)
