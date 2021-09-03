@@ -111,7 +111,7 @@ We artificially made medical imaging dataset to be highly imbalanced (with diffe
 
     <img src=".\readme_images\strat_bn_without_ldam_moving_mean.jpg">
 
-  * ``moving_variance`
+  * `moving_variance`
 
     <img src=".\readme_images\strat_bn_without_ldam_moving_var.jpg">
 
