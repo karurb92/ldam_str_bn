@@ -20,7 +20,7 @@ def main():
     imb_ratio = imb_ratios[1]
     strat_dims = ['age_mapped']
     train_split = 0.8
-    batch_size = 100
+    batch_size = 32
     data_path = project_path
 
     metadf = load_metadf(data_path)

@@ -79,12 +79,6 @@ We artificially made medical imaging dataset to be highly imbalanced (with diffe
 
 ---
 
-* Imbalanced Dataset
-
-  > Imbalance ratio : 10
-
-  guess show some data distribution image here.
-
 * Stratified Batch Normalization
 
   > Without LDAM loss 
@@ -124,16 +118,6 @@ We artificially made medical imaging dataset to be highly imbalanced (with diffe
   * Epoch losses
 
   <img src=".\readme_images\ldam_epoch_loss.jpg">
-
-* Imbalanced data vs Balanced data
-
-* Imbalanced ratio ?? vs Imbalanced ratio ??
-
-* With LDAM vs without LDAM
-
-* With Stratified BN vs without Stratified BN
-
-
 
 ### References
 
