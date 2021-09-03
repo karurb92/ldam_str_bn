@@ -91,6 +91,8 @@ We made medical imaging dataset to be highly imbalanced with implemented data ge
 
   > batch size 32
 
+  ![](C:\Users\SECn\Desktop\ldam_str_bn\readme_images\training_batch32.jpg)
+
 * Training
 
   * Loss가 줄었는지
