@@ -71,7 +71,7 @@ We artificially made medical imaging dataset to be highly imbalanced (with diffe
 
 4. Unit tests for LDAM loss and Stratified Batch Normalization with `unittest`:
    * LDAM loss - compare both pytorch LDAM loss and tensorflow LDAM loss unit by unit
-   * Stratified Batch Normalization
+   * Stratified Batch Normalization - compare two images in 
 
 
 
@@ -87,8 +87,6 @@ We artificially made medical imaging dataset to be highly imbalanced (with diffe
 
 * Stratified Batch Normalization
 
-  > Batch size 32
-  >
   > Without LDAM loss 
 
   * Epoch accuracy
@@ -116,6 +114,16 @@ We artificially made medical imaging dataset to be highly imbalanced (with diffe
     <img src=".\readme_images\strat_bn_without_ldam_moving_var.jpg">
 
   
+
+* LDAM Loss
+
+  * Epoch Accuracy
+
+  <img src=".\readme_images\ldam_epoch_acc.jpg">
+
+  * Epoch losses
+
+  <img src=".\readme_images\ldam_epoch_loss.jpg">
 
 * Imbalanced data vs Balanced data
 
