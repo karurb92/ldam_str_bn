@@ -11,6 +11,7 @@ file_imgs_metadata = 'HAM10000_metadata.csv'
 
 # if one would like to compare model with use of different imbalance ratios, they all need to be specified here
 # knowing the list before the training is required to ensure drawing similar-sized datasets (for better comparison)
+# general: imb_ratio is defined as count_of_main_class / count_of_all_other_classes 
 imb_ratios = [1, 10, 100]
 
 # dictionary of data labels
