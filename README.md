@@ -40,7 +40,7 @@ When it comes to dealing with heavily imbalanced dataset, we focused on two appr
     * Each stratification class uses its own set of gammas and betas
     * The underlying idea of stratification is the assumption that for different stratification classes, distributions of labels differ significantly. Therefore, they should be made even before being fed to the network.
 
-We artificially made medical imaging dataset to be highly imbalanced (with different imbalance ratios). `strat_data_generator` `utils_sc.draw_data()` implement this functionality. Then, we implemented stratified batch normalization (`models.strat_bn_simplified`) within a ResNet model (`models.resnet`) with use of Label-Distribution-Aware loss function (`losses`). In the end, we perform unit tests with `unittest` python module for both the loss function and stratified batch normalization to check if they function correctly.
+We artificially made medical imaging dataset to be highly imbalanced (with different imbalance ratios). `strat_data_generator` and `utils_sc.draw_data()` implement this functionality. Then, we implemented stratified batch normalization (`models.strat_bn_simplified`) within a ResNet model (`models.resnet`) with use of Label-Distribution-Aware loss function (`losses`). In the end, we perform unit tests with `unittest` python module for the loss function, stratified batch normalization and data generator to check if they function correctly.
 
 
 
@@ -49,11 +49,12 @@ We artificially made medical imaging dataset to be highly imbalanced (with diffe
 ---
 
 1. Finding a suitable network architecture
-2. Deciding on what dimensions do we stratify - choice of features and dealing with binary data transformation.
-3. Implementation of stratified batch normalization
+2. Deciding on what dimensions do we stratify - choice of features and dealing with data transformation.
+3. Building our own data generator and feeding metadata to the net in a customized way.
+4. Implementing stratified batch normalization
    * Understanding the concept and original Tensorflow BN implementation
    * Dealing with parameters in new shapes for both training and non-training modes (i.e. updating/using `moving_mean`, `moving_variance`,  `beta`, `gamma`) 
-4. Converting LDAM loss function from PyTorch to Tensorflow
+5. Converting LDAM loss function from PyTorch to Tensorflow
    * Understanding the concept of LDAM in general
    * Dealing with different data structures & methods 
 
@@ -67,11 +68,12 @@ We artificially made medical imaging dataset to be highly imbalanced (with diffe
 
 2. Implemented LDAM loss in Tensorflow (`losses`)
 
-3. Implemented of stratified batch normalization with ResNet model (`models.strat_bn_simplified`, `models.resnet`)
+3. Implemented stratified batch normalization with ResNet model (`models.strat_bn_simplified`, `models.resnet`)
 
-4. Unit tests for LDAM loss and Stratified Batch Normalization with `unittest`:
+4. Unit tests with `unittest`:
    * LDAM loss - compare both pytorch LDAM loss and tensorflow LDAM loss unit by unit
-   * Stratified Batch Normalization - compare two images in 
+   * Stratified Batch Normalization - compare two images from different/same stratification classes
+   * Data Generator - check if it yields metadata (about stratification classes) correctly
 
 
 
