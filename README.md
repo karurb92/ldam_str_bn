@@ -50,7 +50,7 @@ We made medical imaging dataset to be highly imbalanced with implemented data ge
 3. Implementation of stratified batch normalization
    1. Understanding the concepts 
    2. Finding balance between stratification and dataset size
-   3. dealing with parameters. ( i.e. `saving moving_means`, `moving_variances`,  `beta`, `gamma` and to update next training) 
+   3. dealing with parameters. ( i.e. saving `moving_mean`, `moving_variance`,  `beta`, `gamma` etc and and to update next training) 
 4. Converting LDAM loss function to tensorflow
    1. different type of data and function and its inputs
    2. Understanding the structures 
@@ -93,7 +93,7 @@ We made medical imaging dataset to be highly imbalanced with implemented data ge
 
   Changes of `beta`, `gamma`, `moving_mean`, `movng_variance`
 
-  ![](C:\Users\SECn\Desktop\ldam_str_bn\readme_images\training_batch32.jpg)
+  ![](.\readme_images\training_batch32.jpg)
 
 * Training
 
