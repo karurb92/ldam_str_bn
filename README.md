@@ -30,7 +30,7 @@ ex) [HAM_0000118, ISIC_0027419 ,bkl, histo, 80.0, male, scalp]
 
 ---
 
-When it comes to dealing with heavily imbalanced dataset, we focused on two approaches: __Label-distribution-aware loss function(LDAM)__ and __stratified batch normalization__. Because of the advantages of them toward imbalanced data. 
+When it comes to dealing with heavily imbalanced dataset, we focused on two approaches: __Label-distribution-aware loss function(LDAM)__ and __stratified batch normalization__.
 
  * Label-distribution-aware loss function(LDAM)
     * It encourages minority classes to have larger margins.
@@ -40,7 +40,7 @@ When it comes to dealing with heavily imbalanced dataset, we focused on two appr
     * Each stratification class uses its own set of gammas and betas
     * The underlying idea of stratification is the assumption that for different stratification classes, distributions of labels differ significantly. Therefore, they should be made even before being fed to the network.
 
-We artificially made medical imaging dataset to be highly imbalanced (with different imbalance ratios). `strat_data_generator` `utils_sc.draw_data()` implement this functionality. Then, we implemented stratified batch normalization (`models.strat_bn_simplified`) within a ResNet model (`models.resnet`) with use of label-distribution-aware loss function(LDAM)(`losses`). In the end, we perform unit tests by `unittest` python module for both the loss function and stratified batch normalization to check if they function correctly.
+We artificially made medical imaging dataset to be highly imbalanced (with different imbalance ratios). `strat_data_generator` `utils_sc.draw_data()` implement this functionality. Then, we implemented stratified batch normalization (`models.strat_bn_simplified`) within a ResNet model (`models.resnet`) with use of Label-Distribution-Aware loss function (`losses`). In the end, we perform unit tests with `unittest` python module for both the loss function and stratified batch normalization to check if they function correctly.
 
 
 
@@ -49,7 +49,7 @@ We artificially made medical imaging dataset to be highly imbalanced (with diffe
 ---
 
 1. Finding a suitable network architecture
-2. Deciding on what dimensions do we stratify - choice of features to be stratified and dealing with binary data trasformation.
+2. Deciding on what dimensions do we stratify - choice of features and dealing with binary data transformation.
 3. Implementation of stratified batch normalization
    * Understanding the concept and original Tensorflow BN implementation
    * Dealing with parameters in new shapes for both training and non-training modes (i.e. updating/using `moving_mean`, `moving_variance`,  `beta`, `gamma`) 
@@ -67,9 +67,9 @@ We artificially made medical imaging dataset to be highly imbalanced (with diffe
 
 2. Implemented LDAM loss in Tensorflow (`losses`)
 
-3. Implementation of stratified batch normalization with ResNet model (`models.strat_bn_simplified`, `models.resnet`)
+3. Implemented of stratified batch normalization with ResNet model (`models.strat_bn_simplified`, `models.resnet`)
 
-4. Unit tests for LDAM loss and Stratified Batch Normalization by `unittest` module of python
+4. Unit tests for LDAM loss and Stratified Batch Normalization with `unittest`:
    * LDAM loss - compare both pytorch LDAM loss and tensorflow LDAM loss unit by unit
    * Stratified Batch Normalization
 
@@ -135,7 +135,11 @@ We artificially made medical imaging dataset to be highly imbalanced (with diffe
 
   * https://github.com/kaidic/LDAM-DRW/blob/master/losses.py (Pytorch implementation of the authors) 
 
+* Data Generator
 
+  Inspired by this implementation :
+
+  * https://stanford.edu/~shervine/blog/keras-how-to-generate-data-on-the-fly
 
 ---
 
